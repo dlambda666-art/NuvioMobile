@@ -26,17 +26,33 @@ internal object HomeCatalogParser {
                 val name = meta.string("name")
                 if (id.isNullOrBlank() || type.isNullOrBlank() || name.isNullOrBlank()) continue
 
+                // Stremio catalog responses may carry addon-specific metadata
+                // inside the standard meta object. FrenchPulse supports both
+                // that form and the legacy flat/nested forms.
+                val metaPayload = meta["meta"] as? JsonObject
                 val pulse = meta["frenchpulse"] as? JsonObject
-                val hasFrenchPulseMeta = meta["frenchpulse_meta_version"] != null
+                    ?: metaPayload?.get("frenchpulse") as? JsonObject
+                val hasFrenchPulseMeta =
+                    meta["frenchpulse_meta_version"] != null ||
+                        metaPayload?.get("frenchpulse_meta_version") != null
+
                 val status = pulse?.string("status")
                     ?: meta.string("frenchpulse_status")
+                    ?: metaPayload?.string("frenchpulse_status")
                     ?: meta.string("status").takeIf { hasFrenchPulseMeta }
+                    ?: metaPayload?.string("status").takeIf { hasFrenchPulseMeta }
+
                 val quality = pulse?.string("quality")
                     ?: meta.string("frenchpulse_quality")
+                    ?: metaPayload?.string("frenchpulse_quality")
                     ?: meta.string("quality").takeIf { hasFrenchPulseMeta }
+                    ?: metaPayload?.string("quality").takeIf { hasFrenchPulseMeta }
+
                 val vf = pulse?.boolean("vf")
                     ?: meta.boolean("frenchpulse_vf")
+                    ?: metaPayload?.boolean("frenchpulse_vf")
                     ?: meta.boolean("vf").takeIf { hasFrenchPulseMeta }
+                    ?: metaPayload?.boolean("vf").takeIf { hasFrenchPulseMeta }
                     ?: false
 
                 val item = MetaPreview(
