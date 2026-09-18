@@ -144,6 +144,10 @@ private fun PosterGridTile(
                 )
             }
             NuvioPosterWatchedOverlay(isWatched = isWatched)
+            FrenchPulseBadges(
+                item = item,
+                modifier = Modifier.align(Alignment.TopStart),
+            )
         }
         if (!hideLabels) {
             Text(
