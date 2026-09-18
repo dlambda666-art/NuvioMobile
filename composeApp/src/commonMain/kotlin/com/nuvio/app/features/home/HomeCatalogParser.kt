@@ -27,9 +27,17 @@ internal object HomeCatalogParser {
                 if (id.isNullOrBlank() || type.isNullOrBlank() || name.isNullOrBlank()) continue
 
                 val pulse = meta["frenchpulse"] as? JsonObject
-                val status = pulse?.string("status") ?: meta.string("frenchpulse_status")
-                val quality = pulse?.string("quality") ?: meta.string("frenchpulse_quality")
-                val vf = pulse?.boolean("vf") ?: meta.boolean("frenchpulse_vf") ?: false
+                val hasFrenchPulseMeta = meta["frenchpulse_meta_version"] != null
+                val status = pulse?.string("status")
+                    ?: meta.string("frenchpulse_status")
+                    ?: meta.string("status").takeIf { hasFrenchPulseMeta }
+                val quality = pulse?.string("quality")
+                    ?: meta.string("frenchpulse_quality")
+                    ?: meta.string("quality").takeIf { hasFrenchPulseMeta }
+                val vf = pulse?.boolean("vf")
+                    ?: meta.boolean("frenchpulse_vf")
+                    ?: meta.boolean("vf").takeIf { hasFrenchPulseMeta }
+                    ?: false
 
                 val item = MetaPreview(
                     id = id,
