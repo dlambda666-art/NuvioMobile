@@ -107,9 +107,12 @@ fun CatalogScreen(
     var headerHeightPx by remember { mutableIntStateOf(0) }
     var observedOfflineState by remember { mutableStateOf(false) }
 
+    // Lab validation: always re-fetch the catalog so newly exposed FrenchPulse metadata
+    // is not masked by the in-memory CatalogRepository state while the server contract evolves.
     LaunchedEffect(target, homeCatalogSettingsUiState.hideUnreleasedContent) {
         CatalogRepository.load(
             target = target,
+            force = true,
         )
     }
 
