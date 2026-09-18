@@ -4,6 +4,7 @@ import co.touchlab.kermit.Logger
 import com.nuvio.app.core.network.SupabaseProvider
 import com.nuvio.app.core.sync.putSyncOriginClientId
 import com.nuvio.app.features.profiles.ProfileRepository
+import com.nuvio.app.features.home.HomeCatalogSettingsRepository
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.postgrest.rpc
@@ -207,6 +208,7 @@ object AddonRepository {
         }
         persist()
         pushToServer()
+        syncHomeCatalogs()
         return AddAddonResult.Success(manifest)
     }
 
@@ -222,6 +224,7 @@ object AddonRepository {
         if (!changed) return
         persist()
         pushToServer()
+        syncHomeCatalogs()
     }
 
     fun moveAddon(fromIndex: Int, toIndex: Int) {
@@ -268,6 +271,7 @@ object AddonRepository {
         if (!changed) return
         persist()
         pushToServer()
+        syncHomeCatalogs()
         if (shouldRefresh) {
             refreshAddon(manifestUrl)
         }
@@ -329,6 +333,7 @@ object AddonRepository {
                         },
                     )
                 }
+                syncHomeCatalogs()
             } finally {
                 if (activeRefreshJobs[manifestUrl] === refreshJob) {
                     activeRefreshJobs.remove(manifestUrl)
@@ -336,6 +341,10 @@ object AddonRepository {
             }
         }
         activeRefreshJobs[manifestUrl] = refreshJob
+    }
+
+    private fun syncHomeCatalogs() {
+        HomeCatalogSettingsRepository.syncCatalogs(_uiState.value.addons)
     }
 
     private fun pushToServer() {
