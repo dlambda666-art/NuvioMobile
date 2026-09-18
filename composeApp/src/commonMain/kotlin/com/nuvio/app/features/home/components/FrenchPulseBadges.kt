@@ -29,13 +29,13 @@ internal fun FrenchPulseBadges(
         when (status) {
             "nouveaute_vf" -> PulseBadge(
                 text = "Nouveauté VF",
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                containerColor = androidx.compose.ui.graphics.Color(0xFF1B5E20),
+                contentColor = androidx.compose.ui.graphics.Color.White,
             )
             "a_surveiller" -> PulseBadge(
                 text = "À surveiller",
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                containerColor = androidx.compose.ui.graphics.Color(0xFFE65100),
+                contentColor = androidx.compose.ui.graphics.Color.White,
             )
         }
         if (showVf) {
