@@ -8,39 +8,28 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 internal object HomeCatalogParser {
-    private val json = Json {
-        ignoreUnknownKeys = true
-    }
+    private val json = Json { ignoreUnknownKeys = true }
 
-    fun parseCatalog(
-        payload: String,
-        maxItems: Int? = null,
-    ): List<MetaPreview> {
-        return parseCatalogResponse(
-            payload = payload,
-            maxItems = maxItems,
-        ).items
-    }
+    fun parseCatalog(payload: String, maxItems: Int? = null): List<MetaPreview> =
+        parseCatalogResponse(payload, maxItems).items
 
-    fun parseCatalogResponse(
-        payload: String,
-        maxItems: Int? = null,
-    ): ParsedCatalogResponse {
+    fun parseCatalogResponse(payload: String, maxItems: Int? = null): ParsedCatalogResponse {
         val root = json.parseToJsonElement(payload).jsonObject
         val metas = root.array("metas")
         val parsedItems = buildList {
             val seenKeys = mutableSetOf<String>()
             for (element in metas) {
                 if (maxItems != null && size >= maxItems) break
-
                 val meta = element as? JsonObject ?: continue
                 val id = meta.string("id")
                 val type = meta.string("type")
                 val name = meta.string("name")
+                if (id.isNullOrBlank() || type.isNullOrBlank() || name.isNullOrBlank()) continue
 
-                if (id.isNullOrBlank() || type.isNullOrBlank() || name.isNullOrBlank()) {
-                    continue
-                }
+                val pulse = meta["frenchpulse"] as? JsonObject
+                val status = pulse?.string("status") ?: meta.string("frenchpulse_status")
+                val quality = pulse?.string("quality") ?: meta.string("frenchpulse_quality")
+                val vf = pulse?.boolean("vf") ?: meta.boolean("frenchpulse_vf") ?: false
 
                 val item = MetaPreview(
                     id = id,
@@ -54,36 +43,30 @@ internal object HomeCatalogParser {
                     releaseInfo = meta.string("releaseInfo"),
                     rawReleaseDate = meta.string("released"),
                     imdbRating = meta.string("imdbRating"),
-                    genres = meta.array("genres").mapNotNull { genre ->
-                        genre.jsonPrimitive.contentOrNull?.takeIf { it.isNotBlank() }
-                    },
+                    genres = meta.array("genres").mapNotNull { it.jsonPrimitive.contentOrNull?.takeIf(String::isNotBlank) },
+                    frenchPulseStatus = status,
+                    frenchPulseQuality = quality,
+                    frenchPulseVf = vf,
                 )
-                if (seenKeys.add(item.stableKey())) {
-                    add(item)
-                }
+                if (seenKeys.add(item.stableKey())) add(item)
             }
         }
-        return ParsedCatalogResponse(
-            items = parsedItems,
-            rawItemCount = metas.size,
-        )
+        return ParsedCatalogResponse(parsedItems, metas.size)
     }
 
-    private fun JsonObject.string(name: String): String? =
-        this[name]?.jsonPrimitive?.contentOrNull
+    private fun JsonObject.string(name: String): String? = this[name]?.jsonPrimitive?.contentOrNull
+
+    private fun JsonObject.boolean(name: String): Boolean? =
+        this[name]?.jsonPrimitive?.contentOrNull?.toBooleanStrictOrNull()
 
     private fun JsonObject.array(name: String): JsonArray =
         this[name] as? JsonArray ?: JsonArray(emptyList())
 
-    private fun String?.toPosterShape(): PosterShape =
-        when (this?.lowercase()) {
-            "square" -> PosterShape.Square
-            "landscape" -> PosterShape.Landscape
-            else -> PosterShape.Poster
-        }
+    private fun String?.toPosterShape(): PosterShape = when (this?.lowercase()) {
+        "square" -> PosterShape.Square
+        "landscape" -> PosterShape.Landscape
+        else -> PosterShape.Poster
+    }
 }
 
-data class ParsedCatalogResponse(
-    val items: List<MetaPreview>,
-    val rawItemCount: Int,
-)
+data class ParsedCatalogResponse(val items: List<MetaPreview>, val rawItemCount: Int)
