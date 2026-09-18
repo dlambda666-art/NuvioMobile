@@ -9,6 +9,8 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    env:
+      LAB_PROPERTIES_BASE64: ${{ secrets.NUVIO_LOCAL_PROPERTIES_BASE64 }}
     steps:
       - uses: actions/checkout@v4
 
@@ -20,7 +22,22 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Prepare lab properties
-        run: touch local.properties
+        run: |
+          if [[ -z "${LAB_PROPERTIES_BASE64}" ]]; then
+            echo "Missing NUVIO_LOCAL_PROPERTIES_BASE64 repository secret." >&2
+            exit 1
+          fi
+          printf '%s' "${LAB_PROPERTIES_BASE64}" | base64 --decode > local.properties
+          sed -i -E '/^[[:space:]]*sdk\.dir[[:space:]]*=/d' local.properties
+
+      - name: Verify Supabase configuration
+        run: |
+          for property_name in NUVIO_SUPABASE_URL NUVIO_SUPABASE_ANON_KEY; do
+            if ! grep -Eq "^\${property_name}=.+" local.properties; then
+              echo "Missing required property: \${property_name}" >&2
+              exit 1
+            fi
+          done
 
       - name: Compile Android debug
         run: ./gradlew :androidApp:assembleFullDebug --stacktrace
