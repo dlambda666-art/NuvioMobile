@@ -156,6 +156,7 @@ object HomeCatalogSettingsRepository {
         enforcePinnedCollectionsAtTop()
         publish()
         persist()
+        HomeRepository.refresh(addons)
     }
 
     fun syncCollections(collections: List<Collection>) {
