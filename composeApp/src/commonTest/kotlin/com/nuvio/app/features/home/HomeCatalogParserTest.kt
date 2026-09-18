@@ -71,4 +71,31 @@ class HomeCatalogParserTest {
         assertEquals("2027", result.items.single().releaseInfo)
         assertEquals("2027-05-12T00:00:00.000Z", result.items.single().rawReleaseDate)
     }
+    @Test
+    fun `parse catalog response reads nested FrenchPulse metadata`() {
+        val result = HomeCatalogParser.parseCatalog(
+            """
+            {
+              "metas": [
+                {
+                  "id": "tmdb:123",
+                  "type": "movie",
+                  "name": "Test Movie",
+                  "frenchpulse": {
+                    "status": "nouveaute_vf",
+                    "quality": "HDLight",
+                    "vf": true
+                  }
+                }
+              ]
+            }
+            """.trimIndent(),
+        )
+
+        val item = result.single()
+        assertEquals("nouveaute_vf", item.frenchPulseStatus)
+        assertEquals("HDLight", item.frenchPulseQuality)
+        assertEquals(true, item.frenchPulseVf)
+    }
+
 }
