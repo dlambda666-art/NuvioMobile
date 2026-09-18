@@ -19,8 +19,8 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Compile JVM target
-        run: ./gradlew :composeApp:compileDebugKotlinAndroid --stacktrace
+      - name: Compile Android debug
+        run: ./gradlew :androidApp:assembleFullDebug --stacktrace
 
       - name: Run common tests
         run: ./gradlew :composeApp:testDebugUnitTest --stacktrace
