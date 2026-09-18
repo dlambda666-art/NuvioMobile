@@ -24,3 +24,11 @@ jobs:
 
       - name: Compile Android debug
         run: ./gradlew :androidApp:assembleFullDebug --stacktrace
+
+      - name: Upload lab APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: frenchpulse-nuvio-lab-apk
+          path: androidApp/build/outputs/apk/full/debug/*.apk
+          if-no-files-found: error
+          retention-days: 7
