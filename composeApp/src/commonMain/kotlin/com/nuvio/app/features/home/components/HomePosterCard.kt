@@ -2,6 +2,8 @@ package com.nuvio.app.features.home.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Box
 import com.nuvio.app.core.format.formatReleaseDateForDisplay
 import com.nuvio.app.core.ui.NuvioPosterCard
 import com.nuvio.app.core.ui.NuvioPosterShape
@@ -22,7 +24,8 @@ fun HomePosterCard(
     val posterCardStyle = rememberPosterCardStyleUiState()
     val isLandscapeMode = useLandscapeBackdropMode || posterCardStyle.catalogLandscapeModeEnabled
 
-    NuvioPosterCard(
+    Box {
+        NuvioPosterCard(
         title = item.name,
         imageUrl = if (isLandscapeMode) (item.banner ?: item.poster) else item.poster,
         modifier = modifier,
@@ -33,8 +36,13 @@ fun HomePosterCard(
         bottomLeftText = if (isLandscapeMode && showLandscapeOverlay && item.logo.isNullOrBlank() && !posterCardStyle.hideLabelsEnabled) item.name else null,
         isWatched = isWatched,
         onClick = onClick,
-        onLongClick = onLongClick,
-    )
+            onLongClick = onLongClick,
+        )
+        FrenchPulseBadges(
+            item = item,
+            modifier = Modifier.align(Alignment.TopStart),
+        )
+    }
 }
 
 private fun PosterShape.toNuvioPosterShape(): NuvioPosterShape =
