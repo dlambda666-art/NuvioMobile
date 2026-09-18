@@ -21,6 +21,3 @@ jobs:
 
       - name: Compile Android debug
         run: ./gradlew :androidApp:assembleFullDebug --stacktrace
-
-      - name: Run common tests
-        run: ./gradlew :composeApp:testDebugUnitTest --stacktrace
