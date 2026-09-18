@@ -23,7 +23,7 @@ internal fun FrenchPulseBadges(
     if (status == null && !showVf && !showQuality) return
 
     Row(
-        modifier = modifier,
+        modifier = modifier.padding(start = 4.dp, top = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         when (status) {
