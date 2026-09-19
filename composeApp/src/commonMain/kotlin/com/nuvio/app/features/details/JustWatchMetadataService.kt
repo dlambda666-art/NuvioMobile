@@ -6,7 +6,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 internal object JustWatchMetadataService {
     private const val MANIFEST_URL = "https://lambda666-justwatch-dates.hf.space/manifest.json"
-    private const val TIMEOUT_MS = 3_500L
+    private const val TIMEOUT_MS = 10_000L
 
     suspend fun enrich(
         meta: MetaDetails,
