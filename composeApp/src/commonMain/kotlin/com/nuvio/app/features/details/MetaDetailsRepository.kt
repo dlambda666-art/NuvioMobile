@@ -341,23 +341,28 @@ object MetaDetailsRepository {
         mdbListSettings: com.nuvio.app.features.mdblist.MdbListSettings,
         metaScreenSettingsFingerprint: String,
     ) {
-        val cachedEntry = CachedMetaEntry(baseMeta = meta)
+        val enrichedMeta = JustWatchMetadataService.enrich(
+            meta = meta,
+            fallbackItemId = fallbackItemId,
+            type = fallbackItemType,
+        )
+        val cachedEntry = CachedMetaEntry(baseMeta = enrichedMeta)
         cachedMetaByRequestKey[requestKey] = cachedEntry
 
-        if (!shouldEnrichForMetaScreen(meta, fallbackItemId, mdbListSettings)) {
-            _uiState.value = MetaDetailsUiState(meta = meta.withUnreleasedFilter())
+        if (!shouldEnrichForMetaScreen(enrichedMeta, fallbackItemId, mdbListSettings)) {
+            _uiState.value = MetaDetailsUiState(meta = enrichedMeta.withUnreleasedFilter())
             activeRequestKey = requestKey
             return
         }
 
         _uiState.value = MetaDetailsUiState(
             isLoading = true,
-            meta = meta,
+            meta = enrichedMeta,
         )
         val enrichedMeta = withContext(Dispatchers.Default) {
             enrichForMetaScreen(
                 requestKey = requestKey,
-                meta = meta,
+                meta = enrichedMeta,
                 fallbackItemId = fallbackItemId,
                 fallbackItemType = fallbackItemType,
                 settings = mdbListSettings,
