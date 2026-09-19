@@ -359,7 +359,7 @@ object MetaDetailsRepository {
             isLoading = true,
             meta = enrichedMeta,
         )
-        val enrichedMeta = withContext(Dispatchers.Default) {
+        val metaScreenEnrichedMeta = withContext(Dispatchers.Default) {
             enrichForMetaScreen(
                 requestKey = requestKey,
                 meta = enrichedMeta,
@@ -370,10 +370,10 @@ object MetaDetailsRepository {
             )
         }
         cachedMetaByRequestKey[requestKey] = cachedEntry.copy(
-            metaScreenMeta = enrichedMeta,
+            metaScreenMeta = metaScreenEnrichedMeta,
             metaScreenSettingsFingerprint = metaScreenSettingsFingerprint,
         )
-        _uiState.value = MetaDetailsUiState(meta = enrichedMeta.withUnreleasedFilter())
+        _uiState.value = MetaDetailsUiState(meta = metaScreenEnrichedMeta.withUnreleasedFilter())
         activeRequestKey = requestKey
     }
 
